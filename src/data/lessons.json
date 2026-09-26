@@ -138,5 +138,105 @@
   "summary": "对象依赖为何触发无限请求？辨清 Effect 引用比较与 Query Key 稳定哈希。",
   "date": null,
   "status": "unread"
+},
+{
+  "id": "a3b7d2c1-32a7-4c20-b697-e23d370f2a11",
+  "sequence": 11,
+  "content": "## 今日 20 分钟前端实战｜Vue 响应式解构为什么会失效？\n\n今天处理 Vue 3 项目里很常见的一类 Bug：接口数据明明更新了，模板里的字段却停留在旧值。\n\n### ① 概念题｜约 5 分钟\n\n下面代码有什么问题？\n\n```ts\nconst state = reactive({ count: 0 });\nconst { count } = state;\n\nstate.count++;\nconsole.log(count);\n```\n\n`count` 只是解构时得到的普通值，它和响应式对象之间的追踪关系已经断开。`state.count` 会变成 1，但局部变量 `count` 仍是 0。\n\n### ② Debug 实战｜约 8 分钟\n\n组合式函数返回一个响应式对象：\n\n```ts\nfunction useProfile() {\n  const state = reactive({\n    user: null as User | null,\n    loading: false,\n  });\n\n  return state;\n}\n\nconst { user, loading } = useProfile();\n```\n\n请求完成后 `state.user` 已更新，页面却没有刷新。修复方式是保留对象访问，或者在返回前使用 `toRefs`：\n\n```ts\nfunction useProfile() {\n  const state = reactive({\n    user: null as User | null,\n    loading: false,\n  });\n\n  return toRefs(state);\n}\n\nconst { user, loading } = useProfile();\n```\n\n此时解构得到的是 `Ref`，模板会自动解包，脚本中则使用 `user.value`。\n\n### ③ 怎么选择 `ref` 与 `reactive`？\n\n独立值、可能整体替换的数据优先使用 `ref`；多个字段共同描述同一状态时可以使用 `reactive`。不要为了少写 `.value` 把所有东西都塞进一个大对象。\n\n```ts\nconst user = ref<User | null>(null);\nconst loading = ref(false);\n```\n\n这种写法在组合式函数中通常更容易安全解构。\n\n### ④ 面试回答\n\n> Vue 的响应式追踪发生在属性访问或 Ref 的 `.value` 上。直接解构 `reactive` 对象会复制当前值，因此失去后续追踪；需要保留对象访问，或使用 `toRef`、`toRefs` 把属性转换为 Ref。\n\n### ⑤ 小挑战\n\n判断 `const { value } = someRef` 是否仍然响应式，并解释为什么模板对 Ref 可以省略 `.value`，普通 JavaScript 代码却不可以。",
+  "title": "Vue 响应式解构与 toRefs",
+  "tags": ["Vue", "TypeScript"],
+  "summary": "接口数据更新但页面不动？理解 reactive 解构、Ref 与响应式追踪边界。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "f1cb277d-6e13-493c-aa30-b81374bfe012",
+  "sequence": 12,
+  "content": "## 今日 20 分钟前端实战｜Vite 依赖预构建与 HMR\n\n开发服务器第一次启动很快，新增依赖后为什么偶尔又要重新加载整页？今天从 Vite 的两条执行路径理解这个现象。\n\n### ① 概念题｜约 5 分钟\n\nVite 开发环境主要区分两类模块：\n\n```text\n源码模块 → 按需转换，以原生 ESM 提供\n第三方依赖 → 预构建后缓存\n```\n\n依赖预构建会把 CommonJS 或多文件 ESM 依赖转换成浏览器更容易消费的形式，并减少请求数量。生产构建则由 Rollup 完成，它不是把开发服务器简单复制一遍。\n\n### ② Debug 实战｜约 8 分钟\n\n安装新包后页面报错：\n\n```text\n504 Outdated Optimize Dep\n```\n\n常见原因是浏览器还在请求旧的预构建地址。先停止开发服务器，再强制重新优化：\n\n```bash\nnpm run dev -- --force\n```\n\n也可以删除 Vite 的依赖缓存后重启，但不应把“删缓存”当成每次出错的固定动作。先检查锁文件、重复版本和入口是否稳定。\n\n### ③ HMR 为什么能保留状态？\n\n当一个模块接受热更新时，Vite 只替换受影响的模块边界。若更新越过无法接受 HMR 的边界，开发服务器会退回到整页刷新。\n\n```ts\nif (import.meta.hot) {\n  import.meta.hot.accept((nextModule) => {\n    // 接受新模块\n  });\n}\n```\n\n框架插件通常已经替你处理组件级 HMR，不需要业务代码到处手写。\n\n### ④ 面试回答\n\n> Vite 的快主要来自开发期按需编译和浏览器原生 ESM。依赖预构建解决第三方包格式与请求瀑布问题，HMR 则根据模块图只更新受影响边界。生产环境仍要打包、压缩和分块，因此开发与生产是两条不同路径。\n\n### ⑤ 小挑战\n\n解释为什么修改 `vite.config.ts` 往往需要重启开发服务器，而修改一个 Vue 组件通常只触发热更新。",
+  "title": "Vite 依赖预构建与热更新边界",
+  "tags": ["Vite", "TypeScript"],
+  "summary": "从原生 ESM、依赖预构建到 HMR，排查开发服务器的缓存与整页刷新。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "1f6df82a-5c90-48d6-9d31-21f5b0d5d313",
+  "sequence": 13,
+  "content": "## 今日 20 分钟前端实战｜computed、watch 与 watchEffect\n\nVue 页面里出现三个相似 API 时，最常见的问题不是不会写，而是把副作用和派生值混在一起。\n\n### ① 概念题｜约 5 分钟\n\n```ts\nconst firstName = ref('Ada');\nconst lastName = ref('Lovelace');\n```\n\n完整姓名属于纯派生值：\n\n```ts\nconst fullName = computed(\n  () => `${firstName.value} ${lastName.value}`\n);\n```\n\n它应该用 `computed`，因为没有外部副作用，并且可以缓存。\n\n### ② Debug 实战｜约 8 分钟\n\n下面代码会在搜索词变化时请求接口：\n\n```ts\nwatchEffect(async () => {\n  results.value = await search(keyword.value);\n});\n```\n\n快速输入时，旧请求可能后返回并覆盖新结果。使用清理函数取消过期请求：\n\n```ts\nwatch(keyword, async (value, _old, onCleanup) => {\n  const controller = new AbortController();\n  onCleanup(() => controller.abort());\n\n  results.value = await search(value, {\n    signal: controller.signal,\n  });\n});\n```\n\n这里选 `watch`，因为我们明确知道数据源是 `keyword`，也需要访问清理时机。\n\n### ③ 三者的边界\n\n```text\ncomputed   → 计算一个值\nwatch      → 指定数据源，执行副作用\nwatchEffect → 自动收集同步阶段访问的依赖\n```\n\n不要在 `computed` 中发请求或修改其他状态；它应该尽量保持纯函数。异步 `watchEffect` 只会收集首次 `await` 之前访问的依赖，这一点很容易被忽略。\n\n### ④ 面试回答\n\n> 我会先问结果是一个值还是一个动作。值用 computed；需要精确控制来源、旧值和清理时用 watch；依赖简单且希望自动收集时使用 watchEffect。异步副作用还要处理取消或版本校验，避免旧响应覆盖新状态。\n\n### ⑤ 小挑战\n\n给搜索请求增加 300ms 防抖，并保证组件卸载或关键词继续变化时定时器与请求都能被清理。",
+  "title": "Vue computed、watch 与异步清理",
+  "tags": ["Vue", "TypeScript"],
+  "summary": "区分派生值与副作用，并用清理函数阻止旧搜索请求覆盖新结果。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "7666fc0e-ed01-46de-b82e-bc9bb9fa8614",
+  "sequence": 14,
+  "content": "## 今日 20 分钟前端实战｜Vite 环境变量与构建模式\n\n测试环境正常、生产环境却请求了错误接口，往往不是 Axios 的问题，而是环境变量在构建时就被写进了产物。\n\n### ① 概念题｜约 5 分钟\n\nVite 客户端代码只能直接读取带指定前缀的变量：\n\n```ts\nconst apiBase = import.meta.env.VITE_API_BASE_URL;\n```\n\n`.env.production` 中的值会在生产构建时替换进 JavaScript。它不是服务器启动后再读取的秘密配置。\n\n### ② 安全陷阱\n\n下面做法是错误的：\n\n```env\nVITE_PAYMENT_SECRET=real-secret\n```\n\n任何进入客户端包的值都能被访客查看。`VITE_` 表示“可以公开给浏览器”，不是“受 Vite 保护”。密钥必须留在服务器、Worker 或构建平台的服务端环境中。\n\n### ③ Debug 实战｜约 8 分钟\n\n团队执行：\n\n```bash\nvite build --mode staging\n```\n\n但只配置了 `.env.production`，导致 staging 构建取不到地址。应该明确文件加载关系：\n\n```text\n.env\n.env.local\n.env.staging\n.env.staging.local\n```\n\n并在启动时做类型与存在性校验：\n\n```ts\nconst apiBase = import.meta.env.VITE_API_BASE_URL;\nif (!apiBase) {\n  throw new Error('Missing VITE_API_BASE_URL');\n}\n```\n\n补充 `vite-env.d.ts` 可以让 TypeScript 知道变量类型：\n\n```ts\ninterface ImportMetaEnv {\n  readonly VITE_API_BASE_URL: string;\n}\n```\n\n### ④ 面试回答\n\n> Vite 环境变量在构建期注入客户端代码，因此公开前缀下不能放秘密。mode 决定加载哪组 `.env` 文件，但 mode 不等于 Node 的运行环境。我会对必需变量做启动校验，并让真正的敏感配置只存在于服务端。\n\n### ⑤ 小挑战\n\n设计一个 `getEnv()` 函数，集中校验 API 地址、功能开关和允许值，避免业务组件直接散落读取 `import.meta.env`。",
+  "title": "Vite 环境变量、Mode 与秘密边界",
+  "tags": ["Vite", "TypeScript"],
+  "summary": "理解构建期注入、mode 文件加载和 VITE_ 前缀，避免把秘密打进客户端。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "2df6651f-76ba-46cc-ab67-02ce70668f15",
+  "sequence": 15,
+  "content": "## 今日 20 分钟前端实战｜Vue Query 与响应式 Query Key\n\n筛选条件改变后没有重新请求，问题通常出在查询定义读取了错误的值或丢失了响应式来源。\n\n### ① 概念题｜约 5 分钟\n\n```ts\nconst status = ref<'all' | 'paid'>('all');\n\nconst ordersQuery = useQuery({\n  queryKey: ['orders', status.value],\n  queryFn: () => getOrders(status.value),\n});\n```\n\n如果查询配置只在初始化时读取一次 `status.value`，后续变化可能无法进入 Query Key。Vue Query 中应该让选项本身保持响应式：\n\n```ts\nconst ordersQuery = useQuery(() => ({\n  queryKey: ['orders', status.value],\n  queryFn: () => getOrders(status.value),\n}));\n```\n\n### ② Debug 实战｜约 8 分钟\n\n组合式函数错误地接收普通字符串：\n\n```ts\nfunction useOrders(status: OrderStatus) {\n  return useQuery(() => ({\n    queryKey: ['orders', status],\n    queryFn: () => getOrders(status),\n  }));\n}\n\nuseOrders(selectedStatus.value);\n```\n\n传入时已经把 Ref 解包成快照。改为接收 `MaybeRefOrGetter`，在查询函数内部统一读取：\n\n```ts\nfunction useOrders(\n  status: MaybeRefOrGetter<OrderStatus>\n) {\n  return useQuery(() => {\n    const value = toValue(status);\n    return {\n      queryKey: ['orders', value],\n      queryFn: () => getOrders(value),\n    };\n  });\n}\n\nuseOrders(selectedStatus);\n```\n\n### ③ enabled 也要响应式\n\n```ts\nconst userId = ref<string | null>(null);\n\nuseQuery(() => ({\n  queryKey: ['user', userId.value],\n  queryFn: () => getUser(userId.value!),\n  enabled: Boolean(userId.value),\n}));\n```\n\nQuery Key 描述数据身份，`enabled` 描述当前是否允许执行，两者不能互相替代。\n\n### ④ 面试回答\n\n> Vue Query 与 Vue 响应式系统结合时，我会传递 Ref 或 getter，而不是过早解包成普通值。所有会影响请求结果的参数都进入 Query Key，执行前置条件放进响应式 enabled，并在 queryFn 中读取同一份规范化参数。\n\n### ⑤ 小挑战\n\n为 `userId` 增加空值类型保护，使 `queryFn` 内不需要非空断言，同时确保类型和运行时条件一致。",
+  "title": "Vue Query 的响应式参数与条件查询",
+  "tags": ["Vue", "TypeScript", "TanStack Query"],
+  "summary": "避免过早解包 Ref，让 Query Key、queryFn 与 enabled 跟随同一响应式参数。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "6fcb31d5-7368-45c2-83a5-6f8afe286216",
+  "sequence": 16,
+  "content": "## 今日 20 分钟前端实战｜Vite 代码分割与动态导入\n\n把整个后台系统打成一个大文件，首屏会下载用户可能永远不会访问的页面。今天练习如何分块，以及为什么分得越多不一定越快。\n\n### ① 概念题｜约 5 分钟\n\n静态导入通常进入当前模块图：\n\n```ts\nimport { AdminPage } from './AdminPage';\n```\n\n动态导入会形成异步边界：\n\n```ts\nconst AdminPage = () => import('./AdminPage.vue');\n```\n\n路由懒加载让浏览器在访问页面时再下载对应 chunk。\n\n### ② Debug 实战｜约 8 分钟\n\n构建后出现警告：\n\n```text\nSome chunks are larger than 500 kB\n```\n\n不要只把警告阈值调大。先用构建报告确认大文件来自编辑器、图表库还是业务代码，然后选择策略：\n\n```ts\nexport default defineConfig({\n  build: {\n    rollupOptions: {\n      output: {\n        manualChunks: {\n          charts: ['echarts'],\n        },\n      },\n    },\n  },\n});\n```\n\n更自然的路由动态导入通常优先于手工 `manualChunks`。过度切分会增加请求、公共依赖重复和缓存协调成本。\n\n### ③ 缓存为什么关心 chunk 稳定性？\n\n文件名带内容哈希：\n\n```text\nassets/charts-a81f2.js\n```\n\n业务代码变化而图表依赖没变时，稳定的独立 chunk 可以继续命中长期缓存。但分块规则频繁变化，也会让大量文件哈希一起改变。\n\n### ④ 面试回答\n\n> 我会先用路由或功能边界做动态导入，再根据构建分析处理少数大依赖。代码分割的目标是减少关键路径和提升缓存命中，不是追求 chunk 数量。还要结合 HTTP 请求成本、预加载策略和真实用户访问路径衡量。\n\n### ⑤ 小挑战\n\n为报表页面设计懒加载，并说明加载失败时如何展示错误状态、如何允许用户重试动态导入。",
+  "title": "Vite 代码分割、Chunk 与缓存策略",
+  "tags": ["Vite", "TypeScript"],
+  "summary": "用动态导入缩短首屏关键路径，并避免过度手工分块带来的缓存与请求成本。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "f85960f8-c8d8-4214-b5d7-3b1d5a23f317",
+  "sequence": 17,
+  "content": "## 今日 20 分钟前端实战｜Vue 组件通信与 v-model\n\n表单组件能改父组件数据，却越来越难追踪修改来源，通常是因为双向绑定的契约没有被明确建模。\n\n### ① 概念题｜约 5 分钟\n\nVue 组件的核心数据流是：\n\n```text\nProps down\nEvents up\n```\n\n子组件不应该直接修改 prop。标准 `v-model` 等价于一个 prop 加一个事件：\n\n```vue\n<UserName\n  :model-value=\"name\"\n  @update:model-value=\"name = $event\"\n/>\n```\n\n### ② TypeScript 契约\n\n```ts\nconst props = defineProps<{\n  modelValue: string;\n}>();\n\nconst emit = defineEmits<{\n  'update:modelValue': [value: string];\n  submit: [value: string];\n}>();\n```\n\n事件名称和参数都进入类型系统，父组件传错类型会在编译期暴露。\n\n### ③ Debug 实战｜约 8 分钟\n\n```ts\nconst localValue = ref(props.modelValue);\n```\n\n如果父组件之后重置表单，`localValue` 不会自动同步，因为它只是初始化快照。若组件不需要草稿，直接通过计算属性代理：\n\n```ts\nconst value = computed({\n  get: () => props.modelValue,\n  set: (next: string) =>\n    emit('update:modelValue', next),\n});\n```\n\n若组件确实需要“编辑中草稿”，就要明确同步规则：什么时候接收父值，什么时候提交，冲突时谁优先。不要用两个 `watch` 悄悄制造循环同步。\n\n### ④ 多个 v-model\n\n```vue\n<RangePicker\n  v-model:start=\"start\"\n  v-model:end=\"end\"\n/>\n```\n\n多个具名模型适合表达独立字段，但如果两个值必须始终满足业务不变量，也可以把它们封装成一个结构化值。\n\n### ⑤ 面试回答\n\n> v-model 是 prop 与 update 事件的语法约定，不是子组件直接拥有父状态。我会区分受控值和本地草稿，并用 defineProps、defineEmits 明确事件载荷，避免隐式双向同步。\n\n### ⑥ 小挑战\n\n实现一个金额输入组件：父值是 `number | null`，输入框内部允许临时空字符串，失焦时再校验并提交。",
+  "title": "Vue 组件通信与类型安全的 v-model",
+  "tags": ["Vue", "TypeScript"],
+  "summary": "把 v-model 还原为 Prop 与事件契约，处理受控值、本地草稿和类型边界。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "8902c845-b944-4d81-ab1c-81f76baf3618",
+  "sequence": 18,
+  "content": "## 今日 20 分钟前端实战｜Vite 插件顺序与虚拟模块\n\n同一个文件被多个插件处理时，配置顺序可能改变最终结果。理解插件管线，才能定位“开发正常、构建失败”的问题。\n\n### ① 概念题｜约 5 分钟\n\nVite 插件建立在 Rollup 插件接口之上，并增加了开发服务器能力。常见钩子包括：\n\n```text\nresolveId  → 这个导入指向哪里\nload       → 模块内容从哪里来\ntransform  → 如何转换内容\nconfigureServer → 扩展开发服务器\n```\n\n### ② 最小虚拟模块\n\n```ts\nfunction buildInfoPlugin() {\n  const publicId = 'virtual:build-info';\n  const resolvedId = '\\0' + publicId;\n\n  return {\n    name: 'build-info',\n    resolveId(id: string) {\n      if (id === publicId) return resolvedId;\n    },\n    load(id: string) {\n      if (id === resolvedId) {\n        return `export const builtAt = ${JSON.stringify(new Date().toISOString())}`;\n      }\n    },\n  };\n}\n```\n\n业务代码可以像普通模块一样导入：\n\n```ts\nimport { builtAt } from 'virtual:build-info';\n```\n\n前导 `\\0` 表示内部解析后的虚拟 ID，避免被其他插件当作真实文件处理。\n\n### ③ Debug 实战｜约 8 分钟\n\n一个 Markdown 插件和框架插件都想转换同一文件。先检查插件是否设置：\n\n```ts\nenforce: 'pre'\n// 或\nenforce: 'post'\n```\n\n再用 `apply: 'build'` 或函数条件限制运行环境。不要仅靠数组中上下移动直到“碰巧能用”，而要明确输入格式和每个插件期望看到的阶段。\n\n### ④ 面试回答\n\n> Vite 插件通过解析、加载和转换钩子参与模块图。遇到冲突时，我会先确认插件的执行阶段、适用命令和模块 ID，再检查它输出的代码是否是下一个插件期望的输入。虚拟模块适合把构建期信息以标准 ESM 接口暴露给应用。\n\n### ⑤ 小挑战\n\n给虚拟模块补充 TypeScript 声明，并保证构建时间只在生产构建时生成，而不是每次 HMR 都改变。",
+  "title": "Vite 插件管线与虚拟模块",
+  "tags": ["Vite", "TypeScript"],
+  "summary": "理解 resolve、load、transform 的执行阶段，用虚拟模块暴露构建期信息。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "b599c68c-813b-4629-a559-df8516fbd419",
+  "sequence": 19,
+  "content": "## 今日 20 分钟前端实战｜Vue 异步组件与加载失败\n\n路由懒加载上线后，少量用户停留很久再点击菜单会看到“Failed to fetch dynamically imported module”。这通常发生在站点已经发布了新版本。\n\n### ① 问题是怎样产生的？\n\n旧页面仍引用：\n\n```text\nassets/report-oldhash.js\n```\n\n新部署清理了旧文件，用户此时才触发动态导入，请求就会 404。它不是组件代码本身报错，而是 HTML、运行中页面与静态资源版本不一致。\n\n### ② Vue 异步组件｜约 8 分钟\n\n```ts\nconst ReportPanel = defineAsyncComponent({\n  loader: () => import('./ReportPanel.vue'),\n  loadingComponent: LoadingPanel,\n  errorComponent: LoadError,\n  delay: 150,\n  timeout: 15_000,\n});\n```\n\n`delay` 避免极快请求闪一下 Loading；`timeout` 让永远挂起的网络进入明确错误状态。\n\n### ③ 失败后的策略\n\n对网络抖动可以有限重试；对资源 404，更合理的动作通常是提示“发现新版本”并让用户刷新。不要无条件刷新，否则真实代码异常会形成刷新循环。\n\n```ts\nonError(error, retry, fail, attempts) {\n  if (isTransientNetworkError(error) && attempts <= 2) {\n    retry();\n  } else {\n    fail();\n  }\n}\n```\n\n部署端也可以保留一段时间的旧哈希资源，降低长会话用户遇到断层的概率。\n\n### ④ 与 Suspense 的关系\n\n`Suspense` 可以统一协调异步依赖的回退 UI，但错误边界、超时、重试和版本升级提示仍需要单独设计。加载状态不是只有一个布尔值。\n\n### ⑤ 面试回答\n\n> 动态导入失败既可能是网络问题，也可能是部署版本错位。我会区分可重试错误和旧资源 404，提供明确错误 UI，限制重试次数，并配合部署策略保留旧资源或提示刷新。\n\n### ⑥ 小挑战\n\n设计一个不会无限刷新的“新版本可用”处理流程，并说明如何记录已经尝试刷新的版本号。",
+  "title": "Vue 异步组件、错误恢复与部署版本",
+  "tags": ["Vue", "Vite", "TypeScript"],
+  "summary": "处理动态导入失败，区分网络重试、旧资源 404 与新版本刷新策略。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "3237e48f-69ab-479d-9f76-2e2fc941a120",
+  "sequence": 20,
+  "content": "## 今日 20 分钟前端实战｜Vue + Vite 首屏性能排查\n\n最后把 Vue 组件设计和 Vite 构建产物串起来：首屏慢时，不要先猜某个 API 慢，而要把加载阶段拆开。\n\n### ① 建立性能链路｜约 5 分钟\n\n```text\nHTML 到达\n  ↓\n关键 CSS / JS 下载\n  ↓\nJavaScript 解析执行\n  ↓\nVue 挂载\n  ↓\n首屏数据请求\n  ↓\n主要内容出现\n```\n\n每个阶段对应不同证据。Network 看请求瀑布与体积，Performance 看主线程任务，Vue Devtools 看组件更新，真实用户指标则告诉你实验室以外的体验。\n\n### ② Debug 实战｜约 8 分钟\n\n首页同步导入了图表、富文本编辑器和管理后台：\n\n```ts\nimport AdminEditor from './AdminEditor.vue';\nimport ChartDashboard from './ChartDashboard.vue';\n```\n\n即使首屏没有渲染它们，静态导入仍可能把依赖带进关键 chunk。改为路由或功能级动态导入：\n\n```ts\nconst AdminEditor = defineAsyncComponent(\n  () => import('./AdminEditor.vue')\n);\n```\n\n然后运行生产构建，比较 chunk 体积与请求瀑布，而不是只看开发环境。\n\n### ③ 避免无意义的深层响应式\n\n大型只读配置或第三方实例不一定需要深度代理：\n\n```ts\nconst chart = shallowRef<Chart | null>(null);\nconst schema = markRaw(largeSchema);\n```\n\n这类优化必须建立在测量之上。普通对象不需要为了“性能”到处 `markRaw`，否则会增加状态理解成本。\n\n### ④ 资源提示与缓存\n\n关键字体可以预加载，后续页面的 chunk 可以在合适时机预取。带哈希的静态资源适合长期缓存，而 HTML 应更快更新，避免引用过期资源。\n\n### ⑤ 面试回答\n\n> 我会先定位瓶颈属于网络、JavaScript 执行、Vue 渲染还是数据请求，再选择代码分割、减少主线程工作、调整响应式边界或优化 API。Vite 构建报告和浏览器性能工具提供证据，最终用生产构建与真实指标验证。\n\n### ⑥ 综合挑战\n\n首页需要一个轻量摘要图，完整图表只在用户展开后出现。设计组件与动态导入边界，并说明加载中、加载失败、预取时机和缓存策略。",
+  "title": "Vue + Vite 首屏性能诊断",
+  "tags": ["Vue", "Vite", "TypeScript"],
+  "summary": "用加载链路定位首屏瓶颈，再结合动态导入、响应式边界和缓存逐项优化。",
+  "date": "2026-09-26",
+  "status": "unread"
 }
 ]
