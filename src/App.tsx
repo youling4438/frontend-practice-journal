@@ -3,7 +3,7 @@ import {
   ArrowLeft, ArrowUpRight, BookOpen, Bookmark, Clock, Code2, Layers3,
   Menu, Plus, Search, X,
 } from "lucide-react";
-import seed from "./data/lessons.json";
+import { lessons as seed } from "./data/lessons";
 import { Markdown } from "./Markdown";
 
 type Status = "unread" | "review" | "done";

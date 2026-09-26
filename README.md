@@ -27,6 +27,11 @@ npm run build
 
 静态文件会生成在 `dist` 目录，可部署到 Cloudflare Pages 或任何静态托管服务。
 
+## 内容结构
+
+公开训练内容位于 `src/data/lessons`，每篇训练使用一个独立的 JSON 文件。
+新增或调整训练后，需要在该目录的 `index.ts` 中维护导入顺序。
+
 ## Cloudflare Pages
 
 - 构建命令：`npm run build`
