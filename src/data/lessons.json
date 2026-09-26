@@ -238,5 +238,105 @@
   "summary": "用加载链路定位首屏瓶颈，再结合动态导入、响应式边界和缓存逐项优化。",
   "date": "2026-09-26",
   "status": "unread"
+},
+{
+  "id": "c51d742f-10af-4ea8-b40f-8ae5fcbf8921",
+  "sequence": 21,
+  "content": "## 今日 20 分钟前端实战｜HTML5 语义结构与可访问地标\n\n一个页面全由 `div` 拼成，视觉上可能正常，但搜索引擎、读屏软件和维护者很难理解内容层级。\n\n### ① 概念题｜约 5 分钟\n\nHTML5 语义元素描述内容职责：\n\n```html\n<header>站点头部</header>\n<nav aria-label=\"主导航\">...</nav>\n<main>\n  <article>训练正文</article>\n  <aside>相关推荐</aside>\n</main>\n<footer>站点页脚</footer>\n```\n\n`main` 表示页面主要内容，通常一个页面只保留一个可见的 `main`；`article` 应能独立分发；`section` 表达带主题的内容分组，通常需要标题。\n\n### ② Debug 实战｜约 8 分钟\n\n下面的卡片为了点击跳转写成：\n\n```html\n<div onclick=\"openLesson()\">查看训练</div>\n```\n\n它不能自然获得键盘焦点，也没有链接语义。若动作是导航，应使用：\n\n```html\n<a href=\"/lessons/21\">查看训练</a>\n```\n\n若动作是在当前页面执行命令，则使用 `button`。不要用 ARIA 模拟已有的原生元素。\n\n### ③ 标题层级\n\n标题表达文档大纲，不要因为字号需求跳级。样式交给 CSS，结构保持 `h1` 到 `h6` 的逻辑顺序。\n\n### ④ 面试回答\n\n> 语义化 HTML 的价值不只是 SEO。它提供浏览器默认行为、键盘操作和辅助技术可识别的结构，也让团队更容易理解页面。选择元素时先看内容职责，再用 CSS 决定外观。\n\n### ⑤ 小挑战\n\n把一个由十几个 `div` 组成的博客详情页重构为合理的 `header`、`nav`、`main`、`article`、`aside` 和 `footer`，并用地标导航检查结果。",
+  "title": "HTML5 语义结构与可访问地标",
+  "tags": ["HTML5"],
+  "summary": "用原生语义元素建立清晰文档结构，让键盘、读屏软件和搜索引擎理解页面。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "669e2888-15a7-4b3f-9878-650725c9d236",
+  "sequence": 22,
+  "content": "## 今日 20 分钟前端实战｜CSS3 层叠、优先级与 Cascade Layers\n\n样式只能靠不断追加 `!important` 才能生效，通常说明团队没有管理层叠顺序。\n\n### ① 概念题｜约 5 分钟\n\n浏览器决定最终样式时会综合来源、重要性、层、选择器优先级和声明顺序。下面的选择器优先级不同：\n\n```css\n.card .title { color: navy; }\n#dashboard .title { color: tomato; }\n```\n\n后者包含 ID，因此即使写在前面也可能获胜。\n\n### ② 用层管理来源\n\n现代 CSS 可以显式声明层的顺序：\n\n```css\n@layer reset, base, components, utilities;\n\n@layer components {\n  .button { background: navy; }\n}\n\n@layer utilities {\n  .bg-red { background: red; }\n}\n```\n\n层顺序把设计系统、组件和工具类的覆盖关系变成明确规则，减少选择器军备竞赛。\n\n### ③ Debug 实战｜约 8 分钟\n\n如果组件库样式总压过业务样式，先在 DevTools 的 Computed 面板查看哪条规则获胜，再确认它们是否来自不同 layer。不要先增加嵌套或 `!important`。\n\n`:where()` 的优先级始终为零，适合写可被轻松覆盖的基础规则：\n\n```css\n:where(.prose h2) { margin-block-start: 2rem; }\n```\n\n### ④ 面试回答\n\n> 我会先利用层叠规则和 DevTools 定位获胜声明，再通过稳定的 layer 顺序、低优先级基础选择器和局部组件类解决覆盖关系。`!important` 只留给确实需要跨层保证的少数规则。\n\n### ⑤ 小挑战\n\n为 reset、设计令牌、组件和工具类设计一套 layer 顺序，并验证工具类可以覆盖组件默认值。",
+  "title": "CSS3 层叠、优先级与 Cascade Layers",
+  "tags": ["CSS3"],
+  "summary": "读懂样式获胜规则，并用 Cascade Layers 和低优先级选择器控制覆盖关系。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "d80c0915-44f6-4936-bf8e-d013571bbfb7",
+  "sequence": 23,
+  "content": "## 今日 20 分钟前端实战｜HTML5 表单语义与原生校验\n\n表单不是输入框加点击事件。正确的元素、标签和约束能直接提供键盘体验、移动键盘提示与基础校验。\n\n### ① 建立可用表单｜约 5 分钟\n\n```html\n<form>\n  <label for=\"email\">邮箱</label>\n  <input\n    id=\"email\"\n    name=\"email\"\n    type=\"email\"\n    autocomplete=\"email\"\n    required\n  />\n  <button type=\"submit\">订阅</button>\n</form>\n```\n\n`label` 扩大可点击区域，`name` 决定表单提交字段，`type` 和 `autocomplete` 帮助浏览器提供合适能力。\n\n### ② Debug 实战｜约 8 分钟\n\n页面中所有按钮都没写 `type`：\n\n```html\n<button>预览</button>\n```\n\n它位于表单内时默认可能提交表单。非提交动作要明确写：\n\n```html\n<button type=\"button\">预览</button>\n```\n\n提交逻辑应监听 `form` 的 `submit`，而不是只监听按钮点击，这样按回车和辅助技术触发都能走同一流程。\n\n### ③ 原生校验与服务端校验\n\n`required`、`minlength`、`pattern` 可以改善即时体验，但客户端规则可以被绕过。服务端必须再次验证，错误信息还要和对应输入项关联。\n\n### ④ 面试回答\n\n> 我优先使用 HTML 原生表单语义，让浏览器负责提交、焦点和基础约束，再用 JavaScript增强交互。客户端校验改善体验，服务端校验才是数据可信边界。\n\n### ⑤ 小挑战\n\n实现密码确认表单：保留原生必填和长度校验，再用 `setCustomValidity()` 表达两次密码不一致，并在修正输入后清除错误。",
+  "title": "HTML5 表单语义与原生校验",
+  "tags": ["HTML5"],
+  "summary": "从 label、输入类型到 submit 事件，利用浏览器原生能力建立可靠表单。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "71102864-1a85-499d-8a56-873035eb6fa7",
+  "sequence": 24,
+  "content": "## 今日 20 分钟前端实战｜CSS Grid 自适应卡片布局\n\n卡片列表在每个断点手写列数，会让媒体查询越来越多。Grid 可以根据可用空间自行决定列数。\n\n### ① 核心写法｜约 5 分钟\n\n```css\n.card-grid {\n  display: grid;\n  grid-template-columns:\n    repeat(auto-fit, minmax(min(18rem, 100%), 1fr));\n  gap: 1.25rem;\n}\n```\n\n`minmax()` 规定每列可伸缩范围，`auto-fit` 会折叠空轨道，让已有卡片填满剩余空间。\n\n### ② Debug 实战｜约 8 分钟\n\nGrid 容器不断产生横向滚动：\n\n```css\ngrid-template-columns: repeat(3, minmax(300px, 1fr));\n```\n\n当容器小于 900px 加间距时，三列最低宽度无法收缩。可以改为自适应列，或在确实固定三列时补充断点。\n\nGrid 子项中的长 URL 也可能撑开轨道。为允许内容收缩，可以设置：\n\n```css\n.card { min-width: 0; }\n.card a { overflow-wrap: anywhere; }\n```\n\n### ③ auto-fit 与 auto-fill\n\n`auto-fill` 会保留可容纳的空轨道；`auto-fit` 会折叠空轨道。卡片数量少时，两者对剩余空间的处理差异最明显。\n\n### ④ 面试回答\n\n> Grid 适合二维布局。我会让容器通过轨道规则控制列，而不是让每个卡片知道自己处于第几列。响应式设计可以从组件可用空间出发，不必只依赖设备宽度断点。\n\n### ⑤ 小挑战\n\n做一个卡片数量从 1 到 12 都自然排布的列表，验证窄容器、超长标题和只有两张卡片时的表现。",
+  "title": "CSS Grid 自适应卡片布局",
+  "tags": ["CSS3"],
+  "summary": "用 auto-fit、minmax 和可收缩轨道实现少断点的响应式卡片网格。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "1e037657-a760-4555-b0d9-4b34698973d7",
+  "sequence": 25,
+  "content": "## 今日 20 分钟前端实战｜HTML5 响应式图片与加载性能\n\n桌面端大图直接缩小显示在手机上，会浪费流量；所有图片都延迟加载，又可能拖慢首屏最大内容。\n\n### ① 响应式图片｜约 5 分钟\n\n```html\n<img\n  src=\"cover-800.jpg\"\n  srcset=\"cover-480.jpg 480w,\n          cover-800.jpg 800w,\n          cover-1280.jpg 1280w\"\n  sizes=\"(max-width: 700px) 100vw, 50vw\"\n  width=\"1280\"\n  height=\"720\"\n  alt=\"前端训练页面预览\"\n/>\n```\n\n`srcset` 提供候选资源，`sizes` 告诉浏览器图片实际会占多宽，浏览器再结合屏幕密度选择文件。\n\n### ② Debug 实战｜约 8 分钟\n\n页面加载时布局不断跳动，原因是图片未声明尺寸。写出 `width` 和 `height` 后，浏览器可以提前计算宽高比并预留空间。\n\n首屏主视觉通常不应写：\n\n```html\nloading=\"lazy\"\n```\n\n它可能延迟 LCP。首屏以下图片才适合懒加载，并可配合 `decoding=\"async\"`。\n\n### ③ picture 的用途\n\n当你需要不同裁剪构图或格式回退时使用 `picture`：\n\n```html\n<picture>\n  <source type=\"image/avif\" srcset=\"cover.avif\" />\n  <img src=\"cover.jpg\" alt=\"课程封面\" />\n</picture>\n```\n\n### ④ 面试回答\n\n> 响应式图片的目标是让浏览器选择合适资源，同时保持语义和布局稳定。我会提供准确的 sizes、固有尺寸和替代文本，并根据图片是否位于首屏决定懒加载策略。\n\n### ⑤ 小挑战\n\n为文章列表设计三档图片资源，用 Network 面板验证手机视口没有下载桌面大图，并比较 LCP 与 CLS。",
+  "title": "HTML5 响应式图片与加载性能",
+  "tags": ["HTML5"],
+  "summary": "用 srcset、sizes、picture 和固有尺寸减少图片浪费并保持页面稳定。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "557714ac-f3f9-4fbf-b71e-82fd6e9149e5",
+  "sequence": 26,
+  "content": "## 今日 20 分钟前端实战｜Flexbox 收缩与 min-width 陷阱\n\n头像、标题和操作按钮横向排列时，长标题经常把按钮挤出容器，即使标题设置了省略号。\n\n### ① 问题代码｜约 5 分钟\n\n```css\n.row { display: flex; }\n.title {\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n```\n\nFlex 子项默认的自动最小尺寸可能由内容决定，因此 `.title` 不愿收缩到文本固有宽度以下。\n\n### ② 修复｜约 8 分钟\n\n```css\n.title {\n  min-width: 0;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: nowrap;\n}\n.actions { flex: none; }\n```\n\n`min-width: 0` 允许标题所在的 Flex 子项真正收缩；`flex: none` 保持操作区尺寸。\n\n### ③ 理解 flex 简写\n\n```css\n.content { flex: 1 1 0; }\n```\n\n依次表示 grow、shrink 和 basis。不要只背 `flex: 1`，要知道它如何分配剩余空间。多行二维布局优先考虑 Grid，Flexbox 更适合单轴排列。\n\n### ④ Debug 方法\n\n在 DevTools 中查看 Flex overlay 和子项计算后的 `min-width`、`flex-basis`。先确认是谁拒绝收缩，再调整规则。\n\n### ⑤ 面试回答\n\n> Flex 溢出不一定是 `overflow` 没写，而可能是子项的自动最小尺寸阻止收缩。常见修复是对可压缩内容设置 `min-width: 0`，并明确固定区与弹性区的 flex 行为。\n\n### ⑥ 小挑战\n\n实现“头像 + 两行资料 + 操作菜单”的列表项，确保姓名极长、容器极窄和按钮文案变化时都不横向溢出。",
+  "title": "Flexbox 收缩与 min-width 陷阱",
+  "tags": ["CSS3"],
+  "summary": "理解 Flex 子项的自动最小尺寸，解决长文本无法省略和操作区被挤出的故障。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "9a1fa87b-f27b-4688-bd7d-5fbb08e5bc01",
+  "sequence": 27,
+  "content": "## 今日 20 分钟前端实战｜HTML5 Dialog、焦点与关闭语义\n\n自制弹窗常漏掉焦点管理、Esc 关闭和背景交互限制。原生 `dialog` 能提供更完整的基础能力。\n\n### ① 最小实现｜约 5 分钟\n\n```html\n<dialog id=\"confirmDialog\">\n  <form method=\"dialog\">\n    <h2>删除草稿？</h2>\n    <button value=\"cancel\">取消</button>\n    <button value=\"confirm\">确认</button>\n  </form>\n</dialog>\n```\n\n```js\nconst dialog = document.querySelector('#confirmDialog');\ndialog.showModal();\n```\n\n`showModal()` 会进入顶层显示并限制背景交互；`show()` 只是非模态展示。\n\n### ② Debug 实战｜约 8 分钟\n\n开发者用 CSS 把 `dialog` 显示出来：\n\n```css\ndialog { display: block; }\n```\n\n这样没有真正进入模态状态，也绕过了原生打开/关闭生命周期。应该使用 `showModal()` 与 `close()`，并监听 `close` 或 `cancel` 事件。\n\n### ③ 焦点与返回值\n\n打开前记录触发按钮，关闭后恢复焦点。`method=\"dialog\"` 表单提交时不会发网络请求，按钮的 `value` 会成为 `dialog.returnValue`。\n\n不要把不可逆业务操作绑定到“弹窗消失”本身，应只在明确的确认返回值出现时执行。\n\n### ④ 面试回答\n\n> 我优先使用原生 dialog 获得顶层渲染、Esc 行为和模态语义，再补充初始焦点、关闭后的焦点恢复以及业务确认逻辑。视觉关闭与业务确认必须分开。\n\n### ⑤ 小挑战\n\n实现一个确认弹窗，分别处理确认、取消、Esc 和点击背景四条路径，并验证键盘焦点不会落到弹窗后面的页面。",
+  "title": "HTML5 Dialog、焦点与关闭语义",
+  "tags": ["HTML5"],
+  "summary": "利用原生 dialog 构建模态交互，并正确处理焦点、取消和业务确认。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "647c8c13-39d4-4532-89d2-47160d5fe164",
+  "sequence": 28,
+  "content": "## 今日 20 分钟前端实战｜CSS 自定义属性与主题系统\n\n主题切换如果为每个组件复制一套深色样式，颜色会迅速失去一致性。自定义属性可以让组件依赖语义令牌。\n\n### ① 定义语义令牌｜约 5 分钟\n\n```css\n:root {\n  --color-bg: #ffffff;\n  --color-text: #172033;\n  --color-accent: #6d5dfc;\n  color-scheme: light;\n}\n\n[data-theme=\"dark\"] {\n  --color-bg: #10131a;\n  --color-text: #f4f6fb;\n  --color-accent: #9b8cff;\n  color-scheme: dark;\n}\n\n.card {\n  color: var(--color-text);\n  background: var(--color-bg);\n}\n```\n\n组件使用“背景”“正文”“强调”等职责名称，而不是直接依赖某个固定色值。\n\n### ② Debug 实战｜约 8 分钟\n\n```css\ncolor: var(--card-title-color);\n```\n\n变量未定义时，这条声明会失效。可以提供回退：\n\n```css\ncolor: var(--card-title-color, var(--color-text));\n```\n\n但大量回退也可能掩盖令牌拼写错误，核心令牌应通过文档、类型生成或视觉测试统一管理。\n\n### ③ 作用域与继承\n\n自定义属性会继承，可以在组件容器局部覆盖：\n\n```css\n.danger-zone { --color-accent: #d92d20; }\n```\n\n它保存的是标记序列，最终类型取决于使用它的属性。\n\n### ④ 面试回答\n\n> 我会把原始色板和语义令牌分层，组件只消费语义令牌。主题通过根节点覆盖令牌，局部变体通过组件作用域覆盖，并同步设置 color-scheme 让原生控件匹配主题。\n\n### ⑤ 小挑战\n\n设计亮色、暗色和高对比三套令牌，检查正文、边框、焦点环和禁用状态是否都达到可读对比度。",
+  "title": "CSS 自定义属性与主题系统",
+  "tags": ["CSS3"],
+  "summary": "用语义设计令牌和自定义属性组织亮暗主题、局部变体与原生控件外观。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "bf3d45e8-c4f4-4536-8eb6-6ddd411922f8",
+  "sequence": 29,
+  "content": "## 今日 20 分钟前端实战｜HTML5 Script 加载：defer、async 与 module\n\n脚本标签放置不当会阻塞 HTML 解析，或者让依赖脚本以随机顺序执行。\n\n### ① 三种加载方式｜约 5 分钟\n\n普通脚本会在解析器遇到时下载并执行：\n\n```html\n<script src=\"app.js\"></script>\n```\n\n`defer` 并行下载，等待文档解析完成后按文档顺序执行：\n\n```html\n<script defer src=\"vendor.js\"></script>\n<script defer src=\"app.js\"></script>\n```\n\n`async` 下载完成就执行，不保证相互顺序，适合独立统计脚本。\n\n### ② ES Module｜约 8 分钟\n\n```html\n<script type=\"module\" src=\"/src/main.js\"></script>\n```\n\n模块脚本默认具有类似 defer 的行为，拥有独立作用域，并按 import 图加载依赖。模块请求还遵循 CORS。\n\n### ③ Debug 实战\n\n两个互相依赖的旧脚本都加了 `async`，生产环境偶发 `Library is not defined`。问题是执行顺序取决于谁先下载完。应改为 `defer` 保持顺序，或迁移为显式 `import` 的模块。\n\n不要同时依赖脚本顺序和全局变量，却又选择 `async`。\n\n### ④ 面试回答\n\n> defer 适合需要文档解析完成且要求顺序的传统脚本；async 适合没有依赖的独立脚本；module 用模块图表达依赖，并默认延后执行。选择依据是依赖关系和执行时机。\n\n### ⑤ 小挑战\n\n观察 Network 与 Performance 面板，比较普通、defer、async 和 module 脚本对 DOMContentLoaded 与执行顺序的影响。",
+  "title": "HTML5 Script 加载：defer、async 与 module",
+  "tags": ["HTML5"],
+  "summary": "根据依赖关系选择脚本加载模式，避免阻塞解析和随机执行顺序。",
+  "date": "2026-09-26",
+  "status": "unread"
+},
+{
+  "id": "445ec24a-9401-4393-bcb6-f805a89622b6",
+  "sequence": 30,
+  "content": "## 今日 20 分钟前端实战｜CSS Container Queries 组件响应式\n\n同一张卡片放在主内容区很宽，放进侧栏却很窄。只根据视口写媒体查询，组件无法知道自己真正拥有多少空间。\n\n### ① 建立查询容器｜约 5 分钟\n\n```css\n.lesson-list {\n  container-type: inline-size;\n}\n\n.lesson-card {\n  display: grid;\n  gap: 1rem;\n}\n\n@container (min-width: 36rem) {\n  .lesson-card {\n    grid-template-columns: 12rem 1fr;\n  }\n}\n```\n\n卡片样式现在取决于最近查询容器的内联尺寸，而不是整个浏览器窗口。\n\n### ② 命名容器｜约 8 分钟\n\n嵌套布局中可以明确目标：\n\n```css\n.sidebar {\n  container-name: sidebar;\n  container-type: inline-size;\n}\n\n@container sidebar (min-width: 28rem) {\n  .filters { grid-template-columns: 1fr 1fr; }\n}\n```\n\n命名减少组件意外匹配错误祖先容器的可能。\n\n### ③ Debug 实战\n\n查询完全不生效时，先检查祖先是否声明 `container-type`，以及被查询元素是不是容器本身。容器不能根据自身查询结果改变同一维度并造成循环，通常查询其后代。\n\n容器查询与媒体查询可以共存：前者处理组件空间，后者处理视口级导航、输入设备或用户偏好。\n\n### ④ 面试回答\n\n> 媒体查询描述页面环境，容器查询描述组件可用空间。可复用组件更适合围绕容器尺寸调整内部布局，这样放进主栏、侧栏或弹窗时无需知道外部页面结构。\n\n### ⑤ 综合挑战\n\n做一个训练卡片：窄容器为纵向布局，中等容器显示双栏，宽容器增加元信息区域，并保证组件在不同页面区域复用时无需额外类名。",
+  "title": "CSS Container Queries 组件响应式",
+  "tags": ["CSS3"],
+  "summary": "让可复用组件根据自身容器宽度调整布局，而不是依赖全局视口断点。",
+  "date": "2026-09-26",
+  "status": "unread"
 }
 ]
