@@ -8,6 +8,9 @@ import lesson07 from "./07-component-identity-pagination.json";
 import lesson08 from "./08-mutation-race-version-conflict.json";
 import lesson09 from "./09-use-effect-query-key.json";
 import lesson10 from "./10-angular-filters-query-options.json";
+import lesson11 from "./11-html5-css-stacking-context.json";
+import lesson12 from "./12-vue-html5-form-submit.json";
+import lesson13 from "./13-angular-onpush-immutable-grid.json";
 
 export const lessons = [
   lesson01,
@@ -20,4 +23,7 @@ export const lessons = [
   lesson08,
   lesson09,
   lesson10,
+  lesson11,
+  lesson12,
+  lesson13,
 ];
