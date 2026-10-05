@@ -11,6 +11,7 @@ import lesson10 from "./10-angular-filters-query-options.json";
 import lesson11 from "./11-html5-css-stacking-context.json";
 import lesson12 from "./12-vue-html5-form-submit.json";
 import lesson13 from "./13-angular-onpush-immutable-grid.json";
+import lesson14 from "./14-angular-rxjs-search-debounce.json";
 
 export const lessons = [
   lesson01,
@@ -26,4 +27,5 @@ export const lessons = [
   lesson11,
   lesson12,
   lesson13,
+  lesson14,
 ];
